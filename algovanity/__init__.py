@@ -1,3 +1,6 @@
+from multiprocessing import cpu_count
+from multiprocessing import Process, Queue, Value
+from time import time, sleep
 from algosdk import account
 
 
@@ -6,12 +9,63 @@ class AlgoVanity:
     _debug = False
     _logger = None
 
-    patterns = None
+    _counter_attempts = []
+    _queue_matches = []
+    _procs = []
 
-    def __init__(self, patterns, debug=None, logger=None):
+    patterns = None
+    procs_max = 1
+
+    def __init__(self, patterns, procs_max=None, debug=None, logger=None):
         self._debug = debug if debug is not None else self._debug
         self._logger = logger if logger is not None else self._logger
         self.load_patterns(patterns)
+        if procs_max is not None:
+            self.procs_max = procs_max
+        else:
+            self.procs_max = cpu_count()
+        self._counter_attempts = Value('i', 0)
+        self._queue_matches = Queue()
+        self._procs = []
+
+    def run(self):
+        self._time_start = time()
+        for i in range(self.procs_max):
+            p = Process(
+                target = self._job_worker,
+                args = (
+                    self.patterns,
+                    self._queue_matches,
+                    self._counter_attempts,
+                    self._debug, self._logger,
+                ),
+            )
+            p.daemon = True
+            p.start()
+            self._procs.append(p)
+        try:
+            while True:
+                sleep(5)
+                self._job_status()
+        except KeyboardInterrupt:
+            print('')
+            self._job_terminate()
+
+    def _job_status(self):
+        with self._counter_attempts.get_lock():
+            print(f'\r{round(time()-self._time_start)}s - {self._queue_matches.qsize()} matches in {self._counter_attempts.value} attempts', end='')
+
+    def _job_terminate(self):
+        for proc in self._procs:
+            if proc.is_alive():
+                proc.terminate()
+        self.matches = []
+        while not self._queue_matches.empty():
+            #pattern, where, address, pk = self._queue_matches.get()
+            match = self._queue_matches.get()
+            self.matches.append(match)
+        return True
+
 
     def load_patterns(self, patterns, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
@@ -39,20 +93,22 @@ class AlgoVanity:
 
 
     @staticmethod
-    def _job_find_address(DONE, patterns, matches, counter, debug=False, logger=None):
+    def _job_worker(patterns, matches, counter, debug=False, logger=None):
         '''
         Arguments
-            `DONE`      <bool>      flag to read at each loop
             `patterns`  <list>      list of patterns to match, see config
             `matches`   <multiprocessing.Queue>
             `counter`   <multiprocessing.Value>
         '''
-        while not DONE:
-            with counter.get_lock():
-                counter.value += 1
-            match = AlgoVanity.find_address(patterns, debug=debug, logger=logger)
-            if match:
-                matches.put(match)
+        try:
+            while True:
+                with counter.get_lock():
+                    counter.value += 1
+                match = AlgoVanity.find_address(patterns, debug=debug, logger=logger)
+                if match:
+                    matches.put(match)
+        except KeyboardInterrupt:
+            return
 
     @staticmethod
     def find_address(patterns, debug=False, logger=None):
