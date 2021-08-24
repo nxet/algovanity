@@ -18,6 +18,7 @@ setuptools.setup(
     packages = setuptools.find_namespace_packages(include=[__metadata__.__pkgname__, f'{__metadata__.__pkgname__}.*']),
     entry_points = {
         'console_scripts': [
+            'algovanity = algovanity.cli:main',
         ]
     },
     install_requires = [
