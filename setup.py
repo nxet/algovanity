@@ -21,5 +21,6 @@ setuptools.setup(
         ]
     },
     install_requires = [
+        'py-algorand-sdk>=1.7.0',
     ],
 )

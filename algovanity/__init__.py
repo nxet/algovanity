@@ -1,3 +1,5 @@
+from algosdk import account
+
 
 class AlgoVanity:
 
@@ -34,3 +36,28 @@ class AlgoVanity:
         if position not in ('start', 'end'):
             raise ValueError(f'`position` must be one of `start` or `end`, not `{position}`')
         return pattern, position
+
+
+    @staticmethod
+    def _job_find_address(DONE, patterns, matches, counter, debug=False, logger=None):
+        '''
+        Arguments
+            `DONE`      <bool>      flag to read at each loop
+            `patterns`  <list>      list of patterns to match, see config
+            `matches`   <multiprocessing.Queue>
+            `counter`   <multiprocessing.Value>
+        '''
+        while not DONE:
+            with counter.get_lock():
+                counter.value += 1
+            match = AlgoVanity.find_address(patterns, debug=debug, logger=logger)
+            if match:
+                matches.put(match)
+
+    @staticmethod
+    def find_address(patterns, debug=False, logger=None):
+        private_key, address = account.generate_account()
+        for pattern, position in patterns:
+            if (position == 'start' and address.startswith(pattern)) or (position == 'end' and address.endswith(pattern)):
+                return pattern, position, address, private_key
+        return None
