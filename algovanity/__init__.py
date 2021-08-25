@@ -30,7 +30,7 @@ class AlgoVanity:
         self._queue_matches = Queue()
         self._procs = []
 
-    def run(self, debug=None, logger=None):
+    def run(self, output=None, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         self.matches = []
@@ -50,20 +50,16 @@ class AlgoVanity:
             self._procs.append(p)
         try:
             while True:
-                sleep(5)
+                sleep(2)
                 # check for new matches, if available print them
-                matches = self._matches_pull_from_queue(self._queue_matches, debug=debug, logger=logger)
-                if matches:
-                    print('\r', end='') # deletes status line
-                    for match in matches:
-                        self.matches.append(match)
-                        print(*match) # pattern, where, address, pk
+                self.update_matches(output=output, debug=debug, logger=logger)
                 # print status line
                 with self._counter_attempts.get_lock():
                     print(f'\r{round(time()-self._time_start)}s - {self._queue_matches.qsize() + len(self.matches)} matches in {self._counter_attempts.value} attempts', end='')
         except KeyboardInterrupt:
             print('')
             self._job_terminate(debug=debug, logger=logger)
+            self.update_matches(output=output, debug=debug, logger=logger)
 
     def _job_terminate(self, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
@@ -71,8 +67,27 @@ class AlgoVanity:
         for proc in self._procs:
             if proc.is_alive():
                 proc.terminate()
-        self.matches += self._matches_pull_from_queue(self._queue_matches, debug=debug, logger=logger)
         return True
+
+    def update_matches(self, output=None, debug=None, logger=None):
+        debug = debug if debug is not None else self._debug
+        logger = logger if logger is not None else self._logger
+        matches = self._matches_pull_from_queue(self._queue_matches, debug=debug, logger=logger)
+        _f = None
+        if matches:
+            print('\r', end='') # allows to overwrite status line
+            if output is not None:
+                try:
+                    _f = open(output, 'a')
+                except FileNotFoundError:
+                    _f = open(output, 'w')
+            for match in matches:
+                self.matches.append(match)
+                print(*match) # pattern, position, address, pk
+                if _f is not None:
+                    _f.write(' '.join(match) + '\r\n')
+            if _f is not None:
+                _f.close()
 
     @classmethod
     def _matches_pull_from_queue(cls, queue, debug=False, logger=None):
