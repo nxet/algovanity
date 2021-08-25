@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 from multiprocessing import Process, Queue, Value
 from time import time, sleep
+from re import compile as re_compile
 from algosdk import account
 
 
@@ -87,9 +88,10 @@ class AlgoVanity:
                     _f = open(output, 'w')
             for match in matches:
                 self.matches.append(match)
-                print(*match) # pattern, position, address, pk
+                position, pattern, original, address, private_key = match
+                print(original, address, private_key)
                 if _f is not None:
-                    _f.write(' '.join(match) + '\r\n')
+                    _f.write(f'{original} {address} {private_key}\r\n')
             if _f is not None:
                 _f.close()
 
@@ -106,25 +108,25 @@ class AlgoVanity:
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         self.patterns = []
-        for ptn in patterns:
-            ptn,position = self.parse_pattern(ptn, debug=debug, logger=logger)
-            self.patterns.append((ptn,position))
+        for orig in patterns:
+            position, ptn = self.parse_pattern(orig, debug=debug, logger=logger)
+            self.patterns.append((position, ptn, orig, ))
         return True
+
+    _regex_patterns = {
+        'start': re_compile('^([a-zA-Z0-9]*)\,start$'),
+        'end': re_compile('^([a-zA-Z0-9]*)\,end$'),
+        'edges': re_compile('^([a-zA-Z0-9]*)\.\.\.([a-zA-Z0-9]*)$'),
+    }
 
     @classmethod
     def parse_pattern(cls, pattern, debug=False, logger=None):
-        position = 'start'
-        pattern = pattern.split(',')
-        try:
-            pattern, position = pattern
-            position = position.lower()
-        except ValueError as exc:
-            if 'not enough values to unpack (expected 2, got' not in str(exc):
-                raise exc
-            pattern = pattern[0]
-        if position not in ('start', 'end'):
-            raise ValueError(f'`position` must be one of `start` or `end`, not `{position}`')
-        return pattern, position
+        out = None
+        for pos in cls._regex_patterns:
+            match = cls._regex_patterns[pos].fullmatch(pattern)
+            if match:
+                return pos, match.groups()
+        raise ValueError(f'Unable to parse pattern `{pattern}`')
 
 
     @staticmethod
@@ -148,7 +150,10 @@ class AlgoVanity:
     @staticmethod
     def find_address(patterns, debug=False, logger=None):
         private_key, address = account.generate_account()
-        for pattern, position in patterns:
-            if (position == 'start' and address.startswith(pattern)) or (position == 'end' and address.endswith(pattern)):
-                return pattern, position, address, private_key
+        for position, pattern, original in patterns:
+            if \
+                (position == 'start' and address.startswith(pattern)) or \
+                (position == 'end' and address.endswith(pattern)) or \
+                (position == 'edges' and address.startswith(pattern[0]) and address.endswith(pattern[1])):
+                return position, pattern, original, address, private_key
         return None
