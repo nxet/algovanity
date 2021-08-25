@@ -149,14 +149,15 @@ class AlgoVanity:
         return True
 
     _regex_patterns = {
-        'start': re_compile('^([a-zA-Z0-9]*)\,start$'),
-        'end': re_compile('^([a-zA-Z0-9]*)\,end$'),
-        'edges': re_compile('^([a-zA-Z0-9]*)\.\.\.([a-zA-Z0-9]*)$'),
+        'start': re_compile('^([A-Z0-9]*)\,START$'),
+        'end': re_compile('^([A-Z0-9]*)\,END$'),
+        'edges': re_compile('^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$'),
     }
 
     @classmethod
     def parse_pattern(cls, pattern, debug=False, logger=None):
         out = None
+        pattern = pattern.upper()
         for pos in cls._regex_patterns:
             match = cls._regex_patterns[pos].fullmatch(pattern)
             if match:
