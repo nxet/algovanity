@@ -31,12 +31,13 @@ class AlgoVanity:
         self._queue_matches = Queue()
         self._procs = []
 
-    def run(self, output=None, debug=None, logger=None):
+    def run(self, output=None, procs_max=None, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         self.matches = []
         self._time_start = time()
-        for i in range(self.procs_max):
+        procs_max = procs_max if procs_max is not None else self.procs_max
+        for i in range(procs_max):
             p = Process(
                 target = self._job_worker,
                 args = (
