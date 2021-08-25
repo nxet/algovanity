@@ -32,6 +32,13 @@ class AlgoVanity:
         self._procs = []
 
     def run(self, output=None, procs_max=None, debug=None, logger=None):
+        '''
+        start the subprocesses and lock in a loop which prints status info every 2s
+
+        Arguments
+            `output`        <str>   path to file where new matches will be appended
+            `procs_max`     <int>   number of subprocesses to spawn, defaults to `self.procs_max`
+        '''
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         self.matches = []
@@ -53,8 +60,6 @@ class AlgoVanity:
         try:
             while True:
                 sleep(2)
-                # check for new matches, if available print them
-                self.update_matches(output=output, debug=debug, logger=logger)
                 # print status line
                 with self._counter_attempts.get_lock():
                     attempts = self._counter_attempts.value
@@ -62,10 +67,11 @@ class AlgoVanity:
                 results = self._queue_matches.qsize() + len(self.matches)
                 ats = round(attempts / elapsed)
                 print(f'\r{elapsed}s - {results} matches in {attempts} attempts ({ats}/sec)', end='')
+                self._job_update_matches(output=output, debug=debug, logger=logger)
         except KeyboardInterrupt:
             print('')
             self._job_terminate(debug=debug, logger=logger)
-            self.update_matches(output=output, debug=debug, logger=logger)
+            self._job_update_matches(output=output, debug=debug, logger=logger)
 
     def _job_terminate(self, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
@@ -75,7 +81,16 @@ class AlgoVanity:
                 proc.terminate()
         return True
 
-    def update_matches(self, output=None, debug=None, logger=None):
+    def _job_update_matches(self, output=None, debug=None, logger=None):
+        '''
+        checks for new matches added to queue, for each available:
+            - add to `self.matches`
+            - append to `output` file
+            - print original pattern, address and private key
+
+        Arguments
+            `output`    <str>   path to file where new matches will be appended
+        '''
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         matches = self._matches_pull_from_queue(self._queue_matches, debug=debug, logger=logger)
@@ -95,9 +110,19 @@ class AlgoVanity:
                     _f.write(f'{original} {address} {private_key}\r\n')
             if _f is not None:
                 _f.close()
+        return True
 
     @classmethod
     def _matches_pull_from_queue(cls, queue, debug=False, logger=None):
+        '''
+        pulls all available matches from queue and returns a list
+
+        Arguments
+            `queue`     <multiprocessing.Queue>     object used by subprocesses to store matches
+
+        Returns
+            `matches`   <list>      list of tuples containing (position, pattern, original, address, private_key)
+        '''
         matches = []
         while not queue.empty():
             match = queue.get()
