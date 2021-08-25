@@ -60,25 +60,34 @@ class AlgoVanity:
         try:
             while True:
                 sleep(2)
-                # print status line
-                with self._counter_attempts.get_lock():
-                    attempts = self._counter_attempts.value
-                elapsed = round(time() - self._time_start)
-                results = self._queue_matches.qsize() + len(self.matches)
-                ats = round(attempts / elapsed)
-                print(f'\r{elapsed}s - {results} matches in {attempts} attempts ({ats}/sec)', end='')
                 self._job_update_matches(output=output, debug=debug, logger=logger)
+                self._job_status(debug=debug, logger=logger)
         except KeyboardInterrupt:
-            print('')
+            print('') # because `_job_status`
             self._job_terminate(debug=debug, logger=logger)
             self._job_update_matches(output=output, debug=debug, logger=logger)
+            self._job_status(debug=debug, logger=logger)
+            print('') # because `_job_status`
+        return True
 
     def _job_terminate(self, debug=None, logger=None):
         debug = debug if debug is not None else self._debug
         logger = logger if logger is not None else self._logger
         for proc in self._procs:
             if proc.is_alive():
-                proc.terminate()
+                proc.join()
+                proc.close()
+        return True
+
+    def _job_status(self, debug=None, logger=None):
+        debug = debug if debug is not None else self._debug
+        logger = logger if logger is not None else self._logger
+        with self._counter_attempts.get_lock():
+            attempts = self._counter_attempts.value
+        elapsed = round(time() - self._time_start)
+        results = self._queue_matches.qsize() + len(self.matches)
+        ats = round(attempts / elapsed)
+        print(f'\r{elapsed}s - {results} matches in {attempts} attempts ({ats}/sec)', end='')
         return True
 
     def _job_update_matches(self, output=None, debug=None, logger=None):
@@ -171,6 +180,11 @@ class AlgoVanity:
                 if match:
                     matches.put(match)
         except KeyboardInterrupt:
+            try:
+                counter.release()
+            except AssertionError as exc:
+                if 'attempt to release recursive lock not owned by thread' not in str(exc):
+                    raise exc
             return
 
     @staticmethod
