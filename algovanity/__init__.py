@@ -55,7 +55,11 @@ class AlgoVanity:
                 self.update_matches(output=output, debug=debug, logger=logger)
                 # print status line
                 with self._counter_attempts.get_lock():
-                    print(f'\r{round(time()-self._time_start)}s - {self._queue_matches.qsize() + len(self.matches)} matches in {self._counter_attempts.value} attempts', end='')
+                    attempts = self._counter_attempts.value
+                elapsed = round(time() - self._time_start)
+                results = self._queue_matches.qsize() + len(self.matches)
+                ats = round(attempts / elapsed)
+                print(f'\r{elapsed}s - {results} matches in {attempts} attempts ({ats}/sec)', end='')
         except KeyboardInterrupt:
             print('')
             self._job_terminate(debug=debug, logger=logger)
