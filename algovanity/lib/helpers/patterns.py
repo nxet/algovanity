@@ -2,8 +2,8 @@ from re import compile as re_compile
 
 
 regex_patterns = {
-    'start': re_compile('^([A-Z0-9]*)\,START$'),
-    'end': re_compile('^([A-Z0-9]*)\,END$'),
+    'start': re_compile('^([A-Z0-9]*)\.\.\.$'),
+    'end': re_compile('^\.\.\.([A-Z0-9]*)$'),
     'edges': re_compile('^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$'),
 }
 
@@ -12,9 +12,9 @@ def parse_pattern(pattern, debug=False, logger=None):
     parse a single pattern with regex, returns the matched `position` and `patterns`
 
     Parsing rules
-        `start`     ^([A-Z0-9]*)\,START$
-        `end`       ^([A-Z0-9]*)\,END$
-        `edges`     ^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$
+        `start`     ^([A-Z0-9]*)\.\.\.$                     ADDR...
+        `end`       ^\.\.\.([A-Z0-9]*)$                     ...ADDR
+        `edges`     ^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$          COOL...ADDR
 
     Arguments
         `pattern`      <str>       string to parse
