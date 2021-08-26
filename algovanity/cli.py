@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from argparse import RawTextHelpFormatter
 from multiprocessing import cpu_count
 
-from algovanity import AlgoVanity
+from algovanity.lib import AlgoVanity
 from algovanity.__metadata__ import __pkgname__, __version__
 
 
@@ -18,7 +18,6 @@ def main():
     logger = None #get_logger(__pkgname__, args.LOGLEVEL)
     client = AlgoVanity(patterns=args.PATTERNS, procs_max=args.PROCS_MAX, debug=args.DEBUG, logger=logger)
     client.run(output=args.OUTPUT)
-    from pprint import pprint; pprint(client.matches)
 
 
 if __name__ == '__main__':
