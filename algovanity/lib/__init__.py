@@ -1,8 +1,8 @@
 from multiprocessing import cpu_count
-from multiprocessing import Process, Queue, Value
-from time import time, sleep
+from multiprocessing import Queue, Value
+from time import time
 
-from algovanity.lib.helpers.mproc import job_worker, job_status, job_terminate, job_update_matches
+from algovanity.lib.helpers.mproc import job_init, job_main
 from algovanity.lib.helpers.patterns import parse_patterns
 
 
@@ -45,31 +45,8 @@ class AlgoVanity:
         self.matches = []
         self._time_start = time()
         procs_max = procs_max if procs_max is not None else self.procs_max
-        for i in range(procs_max):
-            p = Process(
-                target = job_worker,
-                args = (
-                    self.patterns,
-                    self._queue_matches,
-                    self._counter_attempts,
-                    self._debug, self._logger,
-                ),
-            )
-            p.daemon = True
-            p.start()
-            self._procs.append(p)
-        try:
-            while True:
-                sleep(2)
-                self.matches = job_update_matches(self._queue_matches, self.matches, output=output, debug=debug, logger=logger)
-                job_status(self._queue_matches, self._counter_attempts, self.matches, self._time_start, debug=debug, logger=logger)
-        except KeyboardInterrupt:
-            print('') # because `job_status`
-            job_terminate(self._procs, debug=debug, logger=logger)
-            self.matches = job_update_matches(self._queue_matches, self.matches, output=output, debug=debug, logger=logger)
-            job_status(self._queue_matches, self._counter_attempts, self.matches, self._time_start, debug=debug, logger=logger)
-            print('') # because `job_status`
-        return True
+        self._procs = job_init(self.patterns, self._queue_matches, self._counter_attempts, procs_max)
+        return job_main(self._queue_matches, self._counter_attempts, self._procs, self.matches, self._time_start, output, debug=debug, logger=logger)
 
 
     def load_patterns(self, patterns, debug=None, logger=None):
