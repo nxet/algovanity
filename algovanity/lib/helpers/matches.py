@@ -26,15 +26,12 @@ def algo_find_address(patterns, debug=False, logger=None):
         `patterns`      <list>      list of patterns to match
 
     Returns
-        `matches`       <list>      list of matches in the form (position, pattern, original, address, private_key)
+        `matches`       <list>      list of matches in the form (position, matcher, original, address, private_key)
     '''
     matches = []
     private_key, address = account.generate_account()
-    for position, pattern, original in patterns:
-        if \
-        (position == 'start' and address.startswith(pattern)) or \
-        (position == 'end' and address.endswith(pattern)) or \
-        (position == 'edges' and address.startswith(pattern[0]) and address.endswith(pattern[1])):
-            match = position, pattern, original, address, private_key
-            matches.append(match)
+    for position, matcher, original in patterns:
+        match = matcher.fullmatch(address)
+        if match:
+            matches.append((position, matcher, original, address, private_key))
     return matches
