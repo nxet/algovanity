@@ -3,7 +3,7 @@ from algosdk import account
 
 def matches_pull_from_queue(queue, debug=False, logger=None):
     '''
-    pulls all available matches from queue and returns a list
+    pull all available matches from queue and return a list
 
     Arguments
         `queue`     <multiprocessing.Queue>     object used by subprocesses to store matches
@@ -20,6 +20,8 @@ def matches_pull_from_queue(queue, debug=False, logger=None):
 
 def algo_find_address(patterns, debug=False, logger=None):
     '''
+    generate a random Algorand (address, private_key) pair and attempt to match it against the provided `patterns`
+
     Arguments
         `patterns`      <list>      list of patterns to match
 

@@ -8,7 +8,20 @@ regex_patterns = {
 }
 
 def parse_pattern(pattern, debug=False, logger=None):
-    out = None
+    '''
+    parse a single pattern with regex, returns the matched `position` and `patterns`
+
+    Parsing rules
+        `start`     ^([A-Z0-9]*)\,START$
+        `end`       ^([A-Z0-9]*)\,END$
+        `edges`     ^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$
+
+    Arguments
+        `pattern`      <str>       string to parse
+
+    Returns
+        `parsed`       <tuple>     (position, patterns)
+    '''
     pattern = pattern.upper()
     for pos in regex_patterns:
         match = regex_patterns[pos].fullmatch(pattern)
@@ -16,9 +29,18 @@ def parse_pattern(pattern, debug=False, logger=None):
             return pos, match.groups()
     raise ValueError(f'Unable to parse pattern `{pattern}`')
 
-def parse_patterns(patterns, debug=None, logger=None):
-    out = []
+def parse_patterns(patterns, debug=False, logger=None):
+    '''
+    loop over all provided `patterns` and parse them
+
+    Arguments
+        `patterns`      <list>      list of pattern strings to parse
+
+    Returns
+        `parsed`      <list>        list of parsed pattern strings
+    '''
+    parsed = []
     for orig in patterns:
         position, ptn = parse_pattern(orig, debug=debug, logger=logger)
-        out.append((position, ptn, orig, ))
-    return out
+        parsed.append((position, ptn, orig, ))
+    return parsed
