@@ -4,10 +4,13 @@ from time import time
 
 from algovanity.lib.helpers.mproc import job_init, job_main
 from algovanity.lib.helpers.patterns import parse_patterns
+from algovanity.__metadata__ import __version__
 
 
 class AlgoVanity:
 
+    __version__ = __version__
+    
     _debug = False
     _logger = None
 
