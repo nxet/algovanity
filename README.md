@@ -57,3 +57,6 @@ algovanity '^NAME[0-9]{2}[A-Z0-9]+$' --output ~/algovanity.txt
 
 ##### support this project
 if this software has been helpful please consider donating a few $ALGO to support future development
+##### License
+This project is licensed under GPL 3.0 - see LICENSE for details.
+
