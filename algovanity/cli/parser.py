@@ -30,7 +30,14 @@ def get_parser(name, version):
         'PATTERNS',
         type=str,
         nargs='+',
-        help='see readme'
+        help='''multiple space-separated patterns to match
+Supports matching at `start`, `end` and `edges` of
+the address, with patterns respectively like `ADDR...`,
+`...ADDR` and `COOL...ADDR`.
+Alternatively the user can pass a pure regex string
+which will be compiled and used to `re.fullmatch`
+against generated addresses.
+For more details please refer to the README.md file'''
     )
     parser.add_argument(
         '-p', '--procs-max', dest='PROCS_MAX',
@@ -41,7 +48,7 @@ def get_parser(name, version):
     parser.add_argument(
         '-o', '--output', dest='OUTPUT',
         type=str,
-        help='path to output file - if file exists the new results will be appended'
+        help='optional path to output file - if file exists the new results will be appended'
     )
 
     return parser

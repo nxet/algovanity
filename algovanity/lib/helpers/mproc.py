@@ -77,6 +77,7 @@ def job_terminate(procs, debug=False, logger=None):
 def job_status(queue, counter, matches, time_start, debug=False, logger=None):
     '''
     parse operation statistics and print them to console
+    NB: this method prints a starting carriage-return and no line break (in order to overwrite the old status in each loop) and therefore requires a final `print('')` call to close the current line and print other data below
 
     Arguments
         `queue`         <multiprocessing.Queue>

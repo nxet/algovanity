@@ -31,7 +31,27 @@ Matches are dumped to file at each status update, and finally once the script is
 The file is opened/closed on-demand, allowing to `tail -f` it for example.
 
 ##### examples
-for more details please use the help built into the CLI tool with `algovanity --help`
+```sh
+# install package
+pip3 install algovanity
+
+# match addresses starting with MYNAME
+algovanity MYNAME...
+# or either starting or ending with MYNAME
+algovanity MYNAME... ...MYNAME
+# but limiting to only 2 subprocesses
+algovanity MYNAME... ...MYNAME --procs-max 2
+# dump results to file
+algovanity MYNAME... --output ~/algovanity.txt
+# match addresses starting with COOL and ending with ADDR
+algovanity COOL...ADDR
+# match addresses starting with NAME plus one exact number
+algovanity NAME9... --output ~/algovanity.txt
+# match addresses starting with NAME plus one random number
+algovanity '^NAME[0-9][A-Z0-9]+$' --output ~/algovanity.txt
+# match addresses starting with NAME plus two random numbers
+algovanity '^NAME[0-9]{2}[A-Z0-9]+$' --output ~/algovanity.txt
+```
 
 ---
 

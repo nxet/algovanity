@@ -10,7 +10,7 @@ from algovanity.__metadata__ import __version__
 class AlgoVanity:
 
     __version__ = __version__
-    
+
     _debug = False
     _logger = None
 
@@ -49,7 +49,8 @@ class AlgoVanity:
         self._time_start = time()
         procs_max = procs_max if procs_max is not None else self.procs_max
         self._procs = job_init(self.patterns, self._queue_matches, self._counter_attempts, procs_max)
-        return job_main(self._queue_matches, self._counter_attempts, self._procs, self.matches, self._time_start, output, debug=debug, logger=logger)
+        if job_main(self._queue_matches, self._counter_attempts, self._procs, self.matches, self._time_start, output, debug=debug, logger=logger):
+            return self.matches
 
 
     def load_patterns(self, patterns, debug=None, logger=None):
