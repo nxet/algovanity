@@ -7,7 +7,7 @@ regex_patterns = {
     'edges': re_compile('^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$'),
 }
 
-def parse_pattern(cls, pattern, debug=False, logger=None):
+def parse_pattern(pattern, debug=False, logger=None):
     out = None
     pattern = pattern.upper()
     for pos in regex_patterns:
@@ -17,8 +17,8 @@ def parse_pattern(cls, pattern, debug=False, logger=None):
     raise ValueError(f'Unable to parse pattern `{pattern}`')
 
 def parse_patterns(patterns, debug=None, logger=None):
-    patterns = []
+    out = []
     for orig in patterns:
         position, ptn = parse_pattern(orig, debug=debug, logger=logger)
-        patterns.append((position, ptn, orig, ))
-    return patterns
+        out.append((position, ptn, orig, ))
+    return out
