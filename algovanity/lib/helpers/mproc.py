@@ -31,6 +31,8 @@ def job_init(patterns, queue, counter, procs_max=None, debug=False, logger=None)
         p.daemon = True
         p.start()
         procs.append(p)
+    if logger:
+        logger.info(f'started with {procs_max} subprocesses')
     return procs
 
 
@@ -57,6 +59,8 @@ def job_main(queue, counter, procs, matches, time_start, output=None, debug=Fals
         matches = job_update_matches(queue, matches, output=output, debug=debug, logger=logger)
         job_status(queue, counter, matches, time_start, debug=debug, logger=logger)
         print('') # because `job_status`
+        if logger:
+            logger.info(f'finished, {len(matches)} matches found')
     return True
 
 
@@ -71,6 +75,8 @@ def job_terminate(procs, debug=False, logger=None):
         if proc.is_alive():
             proc.join()
             proc.close()
+    if logger:
+        logger.info('terminated')
     return True
 
 
@@ -118,6 +124,8 @@ def job_update_matches(queue, matches, output=None, debug=False, logger=None):
                 _f = open(output, 'a')
             except FileNotFoundError:
                 _f = open(output, 'w')
+                if logger:
+                    logger.info(f'created output file {output}')
         for match in pulled:
             matches.append(match)
             position, pattern, original, address, private_key = match

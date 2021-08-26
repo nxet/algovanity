@@ -48,7 +48,7 @@ class AlgoVanity:
         self.matches = []
         self._time_start = time()
         procs_max = procs_max if procs_max is not None else self.procs_max
-        self._procs = job_init(self.patterns, self._queue_matches, self._counter_attempts, procs_max)
+        self._procs = job_init(self.patterns, self._queue_matches, self._counter_attempts, procs_max, debug=debug, logger=logger)
         if job_main(self._queue_matches, self._counter_attempts, self._procs, self.matches, self._time_start, output, debug=debug, logger=logger):
             return self.matches
 

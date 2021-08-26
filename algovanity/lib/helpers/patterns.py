@@ -53,4 +53,6 @@ def parse_patterns(patterns, debug=False, logger=None):
     for orig in patterns:
         position, matcher = parse_pattern(orig, debug=debug, logger=logger)
         parsed.append((position, matcher, orig, ))
+    if logger:
+        logger.info(f'loaded {len(parsed)} patterns')
     return parsed

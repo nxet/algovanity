@@ -34,4 +34,6 @@ def algo_find_address(patterns, debug=False, logger=None):
         match = matcher.fullmatch(address)
         if match:
             matches.append((position, matcher, original, address, private_key))
+            if logger:
+                logger.info(f'match found for pattern `{original}`')
     return matches
