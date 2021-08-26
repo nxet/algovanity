@@ -16,15 +16,15 @@ from re import compile as re_compile
 
 
 regex_patterns_parse = {
-    'start': re_compile('^([A-Z0-9]*)\.\.\.$'),
-    'end': re_compile('^\.\.\.([A-Z0-9]*)$'),
-    'edges': re_compile('^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$'),
+    'start': re_compile('^([A-Z2-7]*)\.\.\.$'),
+    'end': re_compile('^\.\.\.([A-Z2-7]*)$'),
+    'edges': re_compile('^([A-Z2-7]*)\.\.\.([A-Z2-7]*)$'),
 }
 
 regex_patterns_match = {
-    'start': '^{}[A-Z0-9]*$',
-    'end': '^[A-Z0-9]*{}$',
-    'edges': '^{}[A-Z0-9]*{}$',
+    'start': '^{}[A-Z2-7]*$',
+    'end': '^[A-Z2-7]*{}$',
+    'edges': '^{}[A-Z2-7]*{}$',
 }
 
 
@@ -33,9 +33,9 @@ def parse_pattern(pattern, debug=False, logger=None):
     parse a single pattern with regex, returns the matched `position` and `patterns`
 
     Parsing rules
-        `start`     ^([A-Z0-9]*)\.\.\.$                     ADDR...
-        `end`       ^\.\.\.([A-Z0-9]*)$                     ...ADDR
-        `edges`     ^([A-Z0-9]*)\.\.\.([A-Z0-9]*)$          COOL...ADDR
+        `start`     ^([A-Z2-7]*)\.\.\.$                     ADDR...
+        `end`       ^\.\.\.([A-Z2-7]*)$                     ...ADDR
+        `edges`     ^([A-Z2-7]*)\.\.\.([A-Z2-7]*)$          COOL...ADDR
         `regex`     <str> will use the provided regex string
 
     Arguments
@@ -44,6 +44,9 @@ def parse_pattern(pattern, debug=False, logger=None):
     Returns
         `parsed`       <tuple>     (position, patterns)
     '''
+    for ii in ('0', '1', '8', '9'):
+        if ii in pattern:
+            raise ValueError('Valid Algorand addresses can NOT contain the numbers 0, 1, 8 and 9')
     pattern = pattern.upper()
     for pos in regex_patterns_parse:
         parsed = regex_patterns_parse[pos].fullmatch(pattern)
