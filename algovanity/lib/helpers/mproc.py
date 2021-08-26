@@ -120,9 +120,10 @@ def job_worker(patterns, matches, counter, debug=False, logger=None):
         while True:
             with counter.get_lock():
                 counter.value += 1
-            match = algo_find_address(patterns, debug=debug, logger=logger)
-            if match:
-                matches.put(match)
+            found = algo_find_address(patterns, debug=debug, logger=logger)
+            if found:
+                for match in found:
+                    matches.put(match)
     except KeyboardInterrupt:
         try:
             counter.release()
