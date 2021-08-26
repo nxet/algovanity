@@ -8,6 +8,8 @@ from algovanity.lib.helpers.matches import algo_find_address
 
 def job_init(patterns, queue, counter, procs_max=None, debug=False, logger=None):
     '''
+    initialize and start the workers
+
     Arguments
         `patterns`      <list>      list of patterns to match
         `queue`         <multiprocessing.Queue>
@@ -34,6 +36,8 @@ def job_init(patterns, queue, counter, procs_max=None, debug=False, logger=None)
 
 def job_main(queue, counter, procs, matches, time_start, output=None, debug=False, logger=None):
     '''
+    lock in a loop printing status info every 2s and waiting for termination signals
+
     Arguments
         `queue`         <multiprocessing.Queue>
         `counter`       <multiprocessing.Value>
@@ -57,6 +61,12 @@ def job_main(queue, counter, procs, matches, time_start, output=None, debug=Fals
 
 
 def job_terminate(procs, debug=False, logger=None):
+    '''
+    wait for all subprocesses to return and close them
+
+    Arguments
+        `procs`     <list>      list of running <multiprocessing.Process> objects
+    '''
     for proc in procs:
         if proc.is_alive():
             proc.join()
@@ -65,6 +75,15 @@ def job_terminate(procs, debug=False, logger=None):
 
 
 def job_status(queue, counter, matches, time_start, debug=False, logger=None):
+    '''
+    parse operation statistics and print them to console
+
+    Arguments
+        `queue`         <multiprocessing.Queue>
+        `counter`       <multiprocessing.Value>
+        `matches`       <list>      parsed matches storage
+        `time_start`    <float>
+    '''
     with counter.get_lock():
         attempts = counter.value
     elapsed = round(time() - time_start)
