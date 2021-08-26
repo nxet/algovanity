@@ -14,9 +14,9 @@ The process spawns multiple subprocesses which will run indefinitely, with a mai
 ##### pattern formats
 Matching is supported with three different patterns:
   - `start` matches the string at the beginning of the address  
-    configured with arguments like `LOLS,start` or `MYNAME,start`
+    configured with arguments like `ADDR...` or `MYNAME...`
   - `end` matches the string at the end of the address  
-    configured with arguments like `LOLS,end` or `MYNAME,end`
+    configured with arguments like `...ADDR` or `...MYNAME`
   - `edges` matches strings both at start and end of the address  
     configured with arguments like `COOL...ADDR` or `ABC...XYZ`
 
