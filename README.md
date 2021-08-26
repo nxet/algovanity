@@ -19,6 +19,8 @@ Matching is supported with three different patterns:
     configured with arguments like `...ADDR` or `...MYNAME`
   - `edges` matches strings both at start and end of the address  
     configured with arguments like `COOL...ADDR` or `ABC...XYZ`
+  - `regex` compiles the provided pattern as is and attempts to `re.fullmatch`
+    configured with arguments like `^AB[.]*CD[.]*YZ$` or `^NAME[0-9]*[.]*$`
 
 > NB: the longer the pattern the longer the run time.  
 > Anything over 6 characters will be running for a **very** long time.
