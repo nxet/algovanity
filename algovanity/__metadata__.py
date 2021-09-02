@@ -1,5 +1,7 @@
 __pkgname__ = 'algovanity'
 __description__ = 'generate vanity addresses for the Algorand blockchain'
-__version__ = '0.1dev0'
+__version__ = '0.1'
 __author__ = 'nxet'
 __author_email__ = 'nxet821@protonmail.com'
+__url__ = 'https://github.com/nxet/algovanity'
+__url_issues__ = 'https://github.com/nxet/algovanity/issues'
